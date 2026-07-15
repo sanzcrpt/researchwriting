@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Thesis Research Assistant</title>
+<link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+<header>
+  <h1>Thesis Research Assistant</h1>
+  <p class="subtitle">Pull a source from Zotero, a PDF, or a link — then generate cited reading notes.</p>
+</header>
+
+<main>
+
+  <section id="step-source" class="card">
+    <h2>1. Add a source</h2>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="zotero">Zotero</button>
+      <button class="tab-btn" data-tab="upload">Upload PDF</button>
+      <button class="tab-btn" data-tab="link">Paste Link</button>
+    </div>
+
+    <div class="tab-panel" id="tab-zotero">
+      <div class="row">
+        <label>Zotero API Key
+          <input type="password" id="zot-api-key" placeholder="Personal API key" autocomplete="off" />
+        </label>
+        <label>Library ID
+          <input type="text" id="zot-library-id" placeholder="e.g. 1234567" />
+        </label>
+        <label>Library Type
+          <select id="zot-library-type">
+            <option value="user">User</option>
+            <option value="group">Group</option>
+          </select>
+        </label>
+      </div>
+      <p class="hint">Your key is stored only in this browser (localStorage) and sent directly to your own server per-request — it is never written to disk server-side. Get a key at zotero.org/settings/keys.</p>
+      <div class="row">
+        <input type="text" id="zot-search" placeholder="Search your library (optional)" />
+        <button id="zot-load-btn">Load Items</button>
+      </div>
+      <div id="zot-items" class="item-list"></div>
+    </div>
+
+    <div class="tab-panel hidden" id="tab-upload">
+      <label>PDF file
+        <input type="file" id="upload-file" accept="application/pdf" />
+      </label>
+      <details>
+        <summary>Citation details (optional — auto-detected if left blank)</summary>
+        <div class="row">
+          <label>Title <input type="text" id="upload-title" /></label>
+          <label>Author(s) <input type="text" id="upload-authors" placeholder="Last, First; Last, First" /></label>
+          <label>Year <input type="text" id="upload-year" /></label>
+          <label>Container/Publisher <input type="text" id="upload-container" /></label>
+        </div>
+      </details>
+      <button id="upload-btn">Ingest PDF</button>
+    </div>
+
+    <div class="tab-panel hidden" id="tab-link">
+      <label>URL
+        <input type="text" id="link-url" placeholder="https://..." />
+      </label>
+      <details>
+        <summary>Citation details (optional — auto-detected if left blank)</summary>
+        <div class="row">
+          <label>Title <input type="text" id="link-title" /></label>
+          <label>Author(s) <input type="text" id="link-authors" /></label>
+          <label>Year <input type="text" id="link-year" /></label>
+          <label>Site/Container <input type="text" id="link-container" /></label>
+        </div>
+      </details>
+      <button id="link-btn">Ingest Link</button>
+    </div>
+
+    <div id="source-status"></div>
+  </section>
+
+  <section id="step-source-preview" class="card hidden">
+    <h2>Current source</h2>
+    <div id="source-preview"></div>
+  </section>
+
+  <section id="step-analyze" class="card hidden">
+    <h2>2. Choose analyses</h2>
+    <div id="analysis-checkboxes" class="checkbox-grid"></div>
+    <div class="row">
+      <label>Concept/term to develop <input type="text" id="concept-term" placeholder="e.g. legitimacy" /></label>
+      <label>Terms to compare (comma-separated) <input type="text" id="compare-terms" placeholder="e.g. equity, equality" /></label>
+    </div>
+    <button id="analyze-btn">Run Analysis</button>
+    <div id="analyze-status"></div>
+  </section>
+
+  <section id="step-results" class="card hidden">
+    <h2>3. Results</h2>
+    <div class="row">
+      <button id="export-all-btn">Export all as Markdown</button>
+      <button id="save-zotero-btn" class="hidden">Save all to Zotero as notes</button>
+    </div>
+    <div id="results"></div>
+  </section>
+
+</main>
+
+<footer>
+  <p>Notes are AI-generated from the source text you provide — verify quotations and citations before relying on them.</p>
+</footer>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
