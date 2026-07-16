@@ -22,15 +22,27 @@ _client: Optional[Anthropic] = None
 
 
 def get_client() -> Anthropic:
+    """Build the Anthropic client.
+
+    ANTHROPIC_API_KEY is the simplest path, but it's not the only one: if it's
+    unset, fall back to a bare Anthropic() client, which lets the SDK resolve
+    credentials itself - ANTHROPIC_AUTH_TOKEN, or an `ant auth login` OAuth
+    profile on this machine. That lets you run this server without ever
+    copying a static API key into .env; just run `ant auth login` once.
+    """
     global _client
-    if _client is None:
-        api_key = os.environ.get("ANTHROPIC_API_KEY")
-        if not api_key:
-            raise RuntimeError(
-                "ANTHROPIC_API_KEY is not set on the server. Add it to your .env file "
-                "(see .env.example) and restart the server."
-            )
-        _client = Anthropic(api_key=api_key)
+    if _client is not None:
+        return _client
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    try:
+        _client = Anthropic(api_key=api_key) if api_key else Anthropic()
+    except Exception as exc:
+        raise RuntimeError(
+            "No Anthropic credentials found. Either set ANTHROPIC_API_KEY in your .env file "
+            "(see .env.example), or skip the API key entirely: install the Anthropic CLI "
+            "(https://platform.claude.com/docs/en/api/sdks/cli) and run `ant auth login` once "
+            "on this machine - the server will then authenticate automatically without a key."
+        ) from exc
     return _client
 
 

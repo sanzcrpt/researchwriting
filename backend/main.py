@@ -69,7 +69,24 @@ class SaveToZoteroRequest(BaseModel):
 
 @app.get("/api/health")
 def health():
-    return {"ok": True, "model": analysis.MODEL, "anthropic_key_set": bool(os.environ.get("ANTHROPIC_API_KEY"))}
+    # Constructing the client never fails, even with zero credentials - the SDK only
+    # validates auth on an actual request. Make one real (unbilled) call so this
+    # reports what will actually happen when an analysis runs.
+    try:
+        analysis.get_client().models.retrieve(analysis.MODEL)
+        auth_configured = True
+        auth_error = None
+    except Exception as exc:
+        auth_configured = False
+        auth_error = str(exc)
+    auth_source = "ANTHROPIC_API_KEY" if os.environ.get("ANTHROPIC_API_KEY") else "ant auth login / ANTHROPIC_AUTH_TOKEN"
+    return {
+        "ok": True,
+        "model": analysis.MODEL,
+        "auth_configured": auth_configured,
+        "auth_source": auth_source,
+        "auth_error": auth_error,
+    }
 
 
 @app.get("/api/analysis-types")

@@ -56,6 +56,24 @@ uvicorn backend.main:app --reload --port 8000
 
 Open http://localhost:8000
 
+### Running without an API key
+
+You don't have to put a static key in `.env`. Leave `ANTHROPIC_API_KEY` unset
+and instead authenticate once at the machine level with the [Anthropic
+CLI](https://platform.claude.com/docs/en/api/sdks/cli):
+
+```bash
+ant auth login
+```
+
+This opens a browser, logs you in, and stores a credential profile on disk.
+The server picks it up automatically (no env var, no code change) — `GET
+/api/health` reports which auth source it found. This is purely a different
+way to authenticate the same Anthropic Developer Platform account, not a way
+to use a claude.ai Pro/Max chat subscription instead: usage is still billed
+per token on whatever account you log into, same rates either way. The only
+thing it avoids is copy-pasting and storing a static key in `.env`.
+
 ## Using it
 
 1. **Add a source**
