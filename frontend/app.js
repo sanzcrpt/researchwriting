@@ -183,12 +183,10 @@ document.getElementById("analyze-btn").addEventListener("click", async () => {
   const termsRaw = document.getElementById("compare-terms").value.trim();
   const terms = termsRaw ? termsRaw.split(",").map((t) => t.trim()).filter(Boolean) : null;
 
-  if (checked.includes("concept_development") && !concept_term) {
-    setStatus("analyze-status", "Concept Development requires a concept/term above.", true);
-    return;
-  }
-  if (checked.includes("term_comparison") && (!terms || terms.length < 2)) {
-    setStatus("analyze-status", "Key Term Comparison requires 2+ comma-separated terms above.", true);
+  // Both fields are optional — leave blank and Claude picks the term(s) itself.
+  // Only block the one genuinely ambiguous case: a single term with nothing to compare it to.
+  if (checked.includes("term_comparison") && terms && terms.length === 1) {
+    setStatus("analyze-status", "Enter 2+ comma-separated terms to compare, or leave the field blank to let Claude choose.", true);
     return;
   }
 

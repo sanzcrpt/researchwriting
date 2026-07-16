@@ -161,11 +161,22 @@ sources' rows into one big comparison matrix), followed by supporting bullet det
     return BASE_SYSTEM, user
 
 
-def build_concept_development(citation: Citation, text: str, concept_term: str) -> tuple[str, str]:
+def build_concept_development(citation: Citation, text: str, concept_term: Optional[str] = None) -> tuple[str, str]:
     source_block, truncated = _source_block(citation, text)
-    task = f"""Perform a concept-development / concept-analysis of the term or phrase \
-"{concept_term}" as it is used in the source below. Follow the classic concept-analysis \
-structure (Walker & Avant style) used for developing key terms in a thesis:
+    if concept_term:
+        subject = f'the term or phrase "{concept_term}"'
+        heading = concept_term
+    else:
+        subject = (
+            "the single most important, thesis-worthy term or concept used in this source. "
+            "Choose it yourself: pick whichever key term or phrase is most central to the "
+            "source's argument and would most reward a full concept analysis. State clearly, "
+            "as the first line under the heading, which term you chose and one sentence on why"
+        )
+        heading = "(you choose the term - name it here)"
+    task = f"""Perform a concept-development / concept-analysis of {subject} as it is used in \
+the source below. Follow the classic concept-analysis structure (Walker & Avant style) used \
+for developing key terms in a thesis:
 
 1. **Uses & classifications** - how the source (and, briefly, common/disciplinary usage if you \
 know it) uses or classifies this term. Note if the source treats it as a single fixed idea or \
@@ -184,7 +195,7 @@ the boundary.
 practice.
 
 Output format:
-## Concept Development: {concept_term}
+## Concept Development: {heading}
 ### Citation
 {{apa reference}}
 ### Uses & Classifications
@@ -208,16 +219,27 @@ Output format:
     return BASE_SYSTEM, user
 
 
-def build_term_comparison(citation: Citation, text: str, terms: list[str]) -> tuple[str, str]:
+def build_term_comparison(citation: Citation, text: str, terms: Optional[list[str]] = None) -> tuple[str, str]:
     source_block, truncated = _source_block(citation, text)
-    terms_str = ", ".join(terms)
-    task = f"""Compare and contrast the following key terms as used in (or relevant to) the \
-source below: {terms_str}. If a term does not literally appear in the source, use the source's \
-closest related discussion, and clearly note when you're drawing on general scholarly usage \
-instead of the source itself.
+    if terms:
+        terms_str = ", ".join(terms)
+        subject = f"the following key terms as used in (or relevant to) the source below: {terms_str}"
+        heading = terms_str
+    else:
+        subject = (
+            "two or three key terms or concepts from the source below that are worth comparing "
+            "and contrasting with each other. Choose them yourself: pick terms that are central "
+            "to the source's argument and whose relationship illuminates something important. "
+            "State clearly, as the first line under the heading, which terms you chose and why "
+            "they're worth comparing"
+        )
+        heading = "(you choose the terms - name them here)"
+    task = f"""Compare and contrast {subject}. If a term does not literally appear in the \
+source, use the source's closest related discussion, and clearly note when you're drawing on \
+general scholarly usage instead of the source itself.
 
 Output format:
-## Key Term Comparison: {terms_str}
+## Key Term Comparison: {heading}
 ### Citation
 {{apa reference}}
 
@@ -261,13 +283,13 @@ ANALYSIS_TYPES = {
     "concept_development": {
         "label": "Concept Development (Term/Concept Analysis)",
         "builder": build_concept_development,
-        "requires": ["concept_term"],
+        "requires": [],
         "max_tokens": 2400,
     },
     "term_comparison": {
         "label": "Key Term Comparison",
         "builder": build_term_comparison,
-        "requires": ["terms"],
+        "requires": [],
         "max_tokens": 2000,
     },
 }
@@ -277,14 +299,11 @@ def run_analysis(analysis_type: str, citation: Citation, text: str, options: dic
     if analysis_type not in ANALYSIS_TYPES:
         raise ValueError(f"Unknown analysis type: {analysis_type}")
     spec = ANALYSIS_TYPES[analysis_type]
-    for req in spec["requires"]:
-        if not options.get(req):
-            raise ValueError(f"Analysis '{analysis_type}' requires '{req}' in options.")
 
     if analysis_type == "concept_development":
-        system, user = spec["builder"](citation, text, options["concept_term"])
+        system, user = spec["builder"](citation, text, options.get("concept_term"))
     elif analysis_type == "term_comparison":
-        system, user = spec["builder"](citation, text, options["terms"])
+        system, user = spec["builder"](citation, text, options.get("terms"))
     else:
         system, user = spec["builder"](citation, text)
 

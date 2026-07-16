@@ -89,8 +89,12 @@
     <h2>2. Choose analyses</h2>
     <div id="analysis-checkboxes" class="checkbox-grid"></div>
     <div class="row">
-      <label>Concept/term to develop <input type="text" id="concept-term" placeholder="e.g. legitimacy" /></label>
-      <label>Terms to compare (comma-separated) <input type="text" id="compare-terms" placeholder="e.g. equity, equality" /></label>
+      <label>Concept/term to develop (optional — leave blank and Claude picks the key term)
+        <input type="text" id="concept-term" placeholder="e.g. legitimacy — or leave blank" />
+      </label>
+      <label>Terms to compare (optional, comma-separated — leave blank and Claude picks)
+        <input type="text" id="compare-terms" placeholder="e.g. equity, equality — or leave blank" />
+      </label>
     </div>
     <button id="analyze-btn">Run Analysis</button>
     <div id="analyze-status"></div>
